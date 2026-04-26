@@ -14,9 +14,9 @@
 html {
     background: var(--paper);
     color: var(--ink);
-    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 16px;
-    line-height: 1.65;
+    font-family: 'Instrument Sans', ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: geometricPrecision;
@@ -46,7 +46,8 @@ header.site {
     justify-content: space-between;
     align-items: baseline;
     border-bottom: 1px solid var(--hairline);
-    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
 }
@@ -73,7 +74,8 @@ footer.site {
     margin: 0 auto;
     padding: 24px 0 48px;
     border-top: 1px solid var(--hairline);
-    font-size: 0.7rem;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
     color: var(--ink-quiet);
@@ -91,18 +93,18 @@ footer.site a:hover {
 }
 
 h1 {
-    font-family: 'IBM Plex Serif', Georgia, serif;
-    font-weight: 500;
-    font-size: clamp(2.2rem, 5vw, 3.4rem);
-    line-height: 1.1;
+    font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: clamp(2.6rem, 6vw, 4.2rem);
+    line-height: 1.05;
     letter-spacing: -0.01em;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
 h2 {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
     margin-top: 56px;
@@ -133,15 +135,18 @@ a:hover {
 }
 
 .lede {
-    font-size: 1.15rem;
-    line-height: 1.55;
+    font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 1.45rem;
+    line-height: 1.4;
     color: var(--ink);
     margin-bottom: 32px;
     max-width: 56ch;
 }
 
 .tagline {
-    font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.22em;
     color: var(--ink-quiet);
@@ -165,7 +170,8 @@ li {
 }
 
 .meta {
-    font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
     color: var(--ink-quiet);
     margin-top: 64px;
     padding-top: 24px;

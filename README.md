@@ -1,13 +1,14 @@
-# seismic-site
+# seismic — site
 
 Marketing, privacy, and support pages for **Seismic Shifts** — an iPad app
 that listens to a room and renders its acoustic energy as a slowly
 scrolling seismograph trace.
 
-Live at: https://ravivasavan.github.io/seismic-site/
+Live at: https://ravivasavan.github.io/seismic/
 
-This site is plain HTML + CSS, served from the `main` branch root via
-GitHub Pages. No build step.
+Source of truth lives on the `gh-pages` branch of the
+[ravivasavan/seismic](https://github.com/ravivasavan/seismic) repository
+(private). Plain HTML + CSS, no build step.
 
 ## Pages
 

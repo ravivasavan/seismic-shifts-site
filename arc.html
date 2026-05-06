@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>The Arc — Seismic Shifts</title>
 <meta name="description" content="A long arc — 65,000 years of Aboriginal sign languages, the 1880 Milan Congress, the eugenics era, and the slow recovery. Companion to the digital trace of Seismic Shifts.">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -16,113 +16,201 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-    /* The arc figure breaks out of the standard 760px main column so
-       the long-arc visualisation has room to read. */
-    .arc-wrap {
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(calc(100vw - 64px), 1280px);
-        margin: 16px 0 56px;
-    }
-    .arc-figure {
-        width: 100%;
-        border: 1px solid var(--hairline);
-        border-radius: 4px;
-        overflow-x: auto;
+    /* The arc page is a fullscreen, immersive canvas. Override the
+       site shell's body padding and let the canvas claim the whole
+       viewport. */
+    body.arc-body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
         background: var(--paper);
-        box-shadow: 0 1px 2px rgba(26, 26, 26, 0.04);
+        height: 100vh;
+        height: 100dvh;
     }
-    .arc-figure svg {
-        display: block;
+
+    .arc-canvas {
+        position: fixed;
+        inset: 0;
+        background: var(--paper);
+        overflow: hidden;
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .arc-canvas.panning { cursor: grabbing; }
+
+    .arc-canvas-inner {
+        position: absolute;
+        inset: 0;
+        transform-origin: 0 0;
+        will-change: transform;
+    }
+    .arc-canvas-inner svg {
         width: 100%;
-        height: auto;
-        min-width: 1000px; /* on narrow viewports, allow horizontal scroll */
-    }
-    .arc-figure figcaption {
-        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.7rem;
-        color: var(--ink-quiet);
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        padding: 14px 20px 18px;
-        border-top: 1px solid var(--hairline);
+        height: 100%;
+        display: block;
     }
 
-    /* Detail slider — quiet control above the figure. */
-    .detail-control {
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(calc(100vw - 64px), 1280px);
-        margin: 32px 0 0;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--ink-quiet);
-    }
-    .detail-control .label { flex: none; color: var(--ink); }
-    .detail-control input[type="range"] {
-        flex: 1;
-        max-width: 360px;
-        accent-color: var(--ink);
-    }
-    .detail-control output {
-        flex: none;
-        color: var(--ink);
-        min-width: 8em;
-    }
-
-    /* Conditional visibility — driven by data-detail on .arc-figure.
+    /* Conditional visibility — driven by data-detail on .arc-canvas-inner.
        Levels: 1 minimal · 2 context · 3 annotations · 4 full. */
-    .arc-figure[data-detail="1"] .from-l2,
-    .arc-figure[data-detail="1"] .from-l3,
-    .arc-figure[data-detail="1"] .from-l4,
-    .arc-figure[data-detail="2"] .from-l3,
-    .arc-figure[data-detail="2"] .from-l4,
-    .arc-figure[data-detail="3"] .from-l4 {
+    .arc-canvas-inner[data-detail="1"] .from-l2,
+    .arc-canvas-inner[data-detail="1"] .from-l3,
+    .arc-canvas-inner[data-detail="1"] .from-l4,
+    .arc-canvas-inner[data-detail="2"] .from-l3,
+    .arc-canvas-inner[data-detail="2"] .from-l4,
+    .arc-canvas-inner[data-detail="3"] .from-l4 {
         display: none;
     }
 
-    @media (max-width: 600px) {
-        .arc-wrap { width: min(calc(100vw - 40px), 1280px); }
-        .detail-control { width: min(calc(100vw - 40px), 1280px); flex-wrap: wrap; gap: 10px; }
-        .detail-control input[type="range"] { max-width: 100%; }
+    /* ============================================================
+       Floating UI — title, nav, controls, hint
+       ============================================================ */
+    .arc-title,
+    .arc-nav,
+    .arc-controls {
+        position: fixed;
+        z-index: 10;
+    }
+
+    .arc-title {
+        top: 24px;
+        left: 24px;
+        background: rgba(244, 239, 230, 0.86);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--hairline);
+        border-radius: 4px;
+        padding: 10px 16px;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+    .arc-title a { color: var(--ink); text-decoration: none; }
+
+    .arc-nav {
+        top: 24px;
+        right: 24px;
+        background: rgba(244, 239, 230, 0.86);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--hairline);
+        border-radius: 4px;
+        padding: 10px 16px;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        display: flex;
+        gap: 18px;
+    }
+    .arc-nav a { color: var(--ink-quiet); text-decoration: none; transition: color 120ms ease; }
+    .arc-nav a:hover, .arc-nav a[aria-current="page"] { color: var(--ink); }
+
+    .arc-controls {
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        max-width: calc(100vw - 48px);
+    }
+    .arc-controls .group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(244, 239, 230, 0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--hairline);
+        border-radius: 4px;
+        padding: 6px;
+    }
+    .arc-controls .group-label {
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--ink-quiet);
+        padding: 0 8px 0 6px;
+    }
+    .arc-controls button {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--ink);
+        cursor: pointer;
+        border-radius: 3px;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        transition: background 100ms ease, color 100ms ease;
+        padding: 0;
+    }
+    .arc-controls button:hover { background: rgba(26, 26, 26, 0.08); }
+    .arc-controls button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .arc-controls button[aria-pressed="true"] {
+        background: var(--ink);
+        color: var(--paper);
+    }
+    .arc-controls button svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+        fill: currentColor;
+    }
+
+    /* Subtle interaction hint — fades after a few seconds */
+    .arc-hint {
+        position: fixed;
+        bottom: 38px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 5;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--ink-quiet);
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 1200ms ease;
+    }
+    .arc-hint.faded { opacity: 0; }
+
+    @media (max-width: 720px) {
+        .arc-nav { display: none; }
+        .arc-controls .group-label { display: none; }
+        .arc-controls { gap: 6px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .arc-canvas-inner { transition: none; }
     }
 </style>
 </head>
-<body>
+<body class="arc-body">
 
-<header class="site">
-    <a href="./">Seismic Shifts</a>
-    <nav>
-        <a href="./">Work</a>
-        <a href="description.html">Description</a>
-        <a href="arc.html" aria-current="page">Arc</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="support.html">Support</a>
-    </nav>
-</header>
-
-<main>
-    <p class="tagline">A long arc — 65,000 years</p>
-    <h1>The Arc</h1>
-    <p class="lede">A companion to the live trace. One room across an afternoon, set against one civilisation across deep time. Both are seismograms.</p>
-
-    <p>The hand-drawn ink companion to <em>Seismic Shifts</em> sits at A0, landscape, beside the digital screen. It traces the presence of Deaf life and signed languages across the long arc — from the deep continuity of Aboriginal sign languages to the seismic moments that have shaped, and unmade, that presence. The page below is its digital draft.</p>
-
-<div class="detail-control">
-    <span class="label">Detail</span>
-    <input type="range" id="detail-slider" min="1" max="4" value="4" step="1" aria-describedby="detail-output" aria-label="Level of detail shown on the long-arc figure">
-    <output id="detail-output" for="detail-slider">full</output>
+<div class="arc-title">
+    <a href="./" aria-label="Seismic Shifts — back to work">Seismic Shifts</a>
 </div>
 
-<div class="arc-wrap">
-    <figure class="arc-figure" data-detail="4">
+<nav class="arc-nav" aria-label="Site">
+    <a href="./">Work</a>
+    <a href="description.html">Description</a>
+    <a href="arc.html" aria-current="page">Arc</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="support.html">Support</a>
+</nav>
+
+<div class="arc-canvas" id="arc-canvas">
+    <div class="arc-canvas-inner" id="arc-canvas-inner" data-detail="4">
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 1189 841"
              preserveAspectRatio="xMidYMid meet"
@@ -153,16 +241,14 @@
                 <text x="1129" y="100" text-anchor="end">DEAF LIFE &amp; SIGNED LANGUAGES — PRESENCE OVER TIME</text>
             </g>
 
-            <!-- Eugenics-era orange band: rect always present (visual context),
-                 label is from-l2. -->
+            <!-- Eugenics-era orange band -->
             <rect x="782" y="130" width="77" height="590" fill="#DB732E" opacity="0.10"/>
             <text class="from-l2" x="820.5" y="150"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.4" letter-spacing="1.6" text-anchor="middle"
                   fill="#9A4E1F" opacity="0.95">EUGENICS ERA</text>
 
-            <!-- Unwritten future zone — faint background and dashed line always;
-                 detailed labels at higher levels. -->
+            <!-- Unwritten future zone -->
             <rect x="1006" y="130" width="103" height="590" fill="#1A1A1A" opacity="0.018"/>
             <line x1="1006" y1="130" x2="1006" y2="720"
                   stroke="#1A1A1A" stroke-width="0.4" stroke-dasharray="1.2 2.0" opacity="0.45"/>
@@ -180,7 +266,7 @@
                   font-style="italic" font-size="8" text-anchor="middle"
                   fill="#1A1A1A" opacity="0.7">not yet drawn</text>
 
-            <!-- Faint above/below baseline guides — pure decoration, full detail only -->
+            <!-- Faint above/below baseline guides -->
             <rect class="from-l4" x="80" y="130" width="926" height="270" fill="#1A1A1A" opacity="0.015"/>
             <rect class="from-l4" x="80" y="400" width="926" height="320" fill="#1A1A1A" opacity="0.030"/>
 
@@ -198,15 +284,14 @@
                   font-size="4.4" text-anchor="end" fill="#1A1A1A" opacity="0.5"
                   letter-spacing="0.6">historical norm</text>
 
-            <!-- Y-axis qualitative labels: CELEBRATED · BASELINE · SUPPRESSED.
-                 These are the always-visible y-axis terms. -->
+            <!-- Y-axis qualitative labels -->
             <g font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                font-size="5.2" fill="#1A1A1A" opacity="0.55" letter-spacing="1.2">
                 <text x="68" y="190" text-anchor="end">CELEBRATED</text>
                 <text x="68" y="610" text-anchor="end">SUPPRESSED</text>
             </g>
 
-            <!-- Era separators — context level -->
+            <!-- Era separators -->
             <g class="from-l2" stroke="#1A1A1A" stroke-width="0.3" stroke-dasharray="1.2 2.4" opacity="0.20">
                 <line x1="278" y1="130" x2="278" y2="720"/>
                 <line x1="530" y1="130" x2="530" y2="720"/>
@@ -214,7 +299,7 @@
                 <line x1="859" y1="130" x2="859" y2="720"/>
             </g>
 
-            <!-- Era band labels — context level -->
+            <!-- Era band labels -->
             <g class="from-l2"
                font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                font-size="5.6" letter-spacing="1.6" fill="#1A1A1A" opacity="0.6"
@@ -225,48 +310,19 @@
                 <text x="932" y="170">SLOW RECOVERY</text>
             </g>
 
-            <!-- ============================================================
-                 The trace
-                 ============================================================ -->
+            <!-- The trace -->
             <polyline
                 points="
-                    80,408
-                    134,400
-                    206,406
-                    278,396
-                    350,404
-                    422,398
-                    494,402
-                    555,402
-                    591,398
-                    656,388
-                    661,386
-                    666,384
-                    721,374
-                    766,370
-                    781,368
-                    782,548
-                    793,600
-                    814,640
-                    834,668
-                    844,700
-                    855,718
-                    859,690
-                    886,602
-                    895,556
-                    913,510
-                    937,470
-                    950,446
-                    964,432
-                    977,425
-                    1006,425
+                    80,408 134,400 206,406 278,396 350,404 422,398 494,402
+                    555,402 591,398 656,388 661,386 666,384 721,374 766,370
+                    781,368 782,548 793,600 814,640 834,668 844,700 855,718
+                    859,690 886,602 895,556 913,510 937,470 950,446 964,432
+                    977,425 1006,425
                 "
                 fill="none" stroke="#1A1A1A" stroke-width="1.6"
                 stroke-linejoin="round" stroke-linecap="round"/>
 
-            <!-- ============================================================
-                 Aboriginal sign languages banner — full detail only
-                 ============================================================ -->
+            <!-- Aboriginal sign languages banner -->
             <g class="from-l4">
                 <line x1="115" y1="240" x2="115" y2="404" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
                 <line x1="115" y1="240" x2="350" y2="240" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
@@ -282,7 +338,7 @@
                       letter-spacing="0.9">c. 65,000 BP — continuous transmission</text>
             </g>
 
-            <!-- Plains Indian Sign Language — full detail only -->
+            <!-- Plains Indian Sign Language -->
             <g class="from-l4">
                 <text x="404" y="280"
                       font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
@@ -295,11 +351,6 @@
                       letter-spacing="0.8">parallel deep-time signing tradition</text>
                 <line x1="404" y1="300" x2="404" y2="395" stroke="#1A1A1A" stroke-width="0.3" opacity="0.30"/>
             </g>
-
-            <!-- ============================================================
-                 Events — each has dot + short year-name label always visible.
-                 Italic descriptors and decorative subtexts are level-3 or 4.
-                 ============================================================ -->
 
             <!-- Ponce de León c.1550 -->
             <circle cx="555" cy="402" r="1.8" fill="#1A1A1A"/>
@@ -361,9 +412,7 @@
             </text>
             <line x1="766" y1="316" x2="766" y2="368" stroke="#1A1A1A" stroke-width="0.25" opacity="0.30"/>
 
-            <!-- ============================================================
-                 1880 — THE BREAK. Always visible at all detail levels.
-                 ============================================================ -->
+            <!-- 1880 — THE BREAK. Always visible. -->
             <line x1="782" y1="130" x2="782" y2="720"
                   stroke="#C72E1F" stroke-width="0.8" opacity="0.55"/>
             <circle cx="782" cy="368" r="3.4" fill="#C72E1F"/>
@@ -391,11 +440,7 @@
                 </text>
             </g>
 
-            <!-- ============================================================
-                 Eugenics-era event labels
-                 ============================================================ -->
-
-            <!-- AGB Memoir 1883 — dot+short label always; long Memoir text full detail only -->
+            <!-- AGB Memoir 1883 -->
             <circle cx="793" cy="600" r="1.8" fill="#1A1A1A"/>
             <line x1="793" y1="602" x2="793" y2="630" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
             <text x="793" y="640"
@@ -430,7 +475,7 @@
                 first US sterilisation law
             </text>
 
-            <!-- Australian assimilation policies (range bracket) — annotations level -->
+            <!-- Australian assimilation policies (range bracket) -->
             <g class="from-l3">
                 <line x1="816" y1="740" x2="902" y2="740" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
                 <line x1="816" y1="737" x2="816" y2="743" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
@@ -445,8 +490,7 @@
                 suppression of Aboriginal languages, including Aboriginal sign systems
             </text>
 
-            <!-- Nazi 1933 + Aktion T4 1939-45 cluster.
-                 Dots always; leader line + cluster labels are annotations level. -->
+            <!-- Nazi 1933 + Aktion T4 1939-45 cluster -->
             <circle cx="844" cy="700" r="1.8" fill="#1A1A1A"/>
             <circle cx="855" cy="718" r="2.2" fill="#1A1A1A"/>
             <g class="from-l3">
@@ -463,10 +507,6 @@
                   font-style="italic" font-size="6.0" text-anchor="start" fill="#1A1A1A" opacity="0.8">
                 ~17,000 deaf people sterilised; thousands murdered
             </text>
-
-            <!-- ============================================================
-                 Slow recovery
-                 ============================================================ -->
 
             <!-- Stokoe 1960 -->
             <circle cx="886" cy="602" r="1.8" fill="#1A1A1A"/>
@@ -533,9 +573,7 @@
                 not yet at the line it left
             </text>
 
-            <!-- ============================================================
-                 Time axis — always visible at all detail levels
-                 ============================================================ -->
+            <!-- Time axis -->
             <line x1="80" y1="730" x2="1109" y2="730"
                   stroke="#1A1A1A" stroke-width="0.5" opacity="0.7"/>
 
@@ -567,72 +605,232 @@
                   letter-spacing="0.6">TIME SCALE NON-UNIFORM — DEEP PAST COMPRESSED, MODERN ERA EXPANDED</text>
 
         </svg>
-        <figcaption>
-            A0 landscape · 1189 × 841 mm · companion study for the hand-drawn ink piece
-        </figcaption>
-    </figure>
+    </div>
 </div>
 
-    <h2>What this shows</h2>
-    <p>The vertical axis is presence. Above the baseline: Deaf life and signed languages held as a celebrated, transmitted feature of human community. Below: suppressed. The baseline itself is the deep historical norm — 65,000 years of continuous signed-language presence on this continent and others, long before any institution thought to record it.</p>
-    <p>The trace runs at-baseline through the deep past. It rises modestly through the Western institutional period of the 18th and 19th centuries. It plummets at the 1880 Milan Congress. It deepens through the eugenics era of Alexander Graham Bell and his contemporaries — the 1907 Indiana sterilisation law, Australian assimilation policies, the 1933 Nazi sterilisation law and Aktion T4. It begins climbing again in 1960 with William Stokoe's demonstration that ASL is a natural language; it continues through the naming of Auslan, Deaf President Now, the recognition of NZSL, and the ICED's 2010 apology for the Milan resolutions. In 2026 it is rising. It is not yet at the line it left.</p>
-    <p>The right ten per cent of the page is intentionally blank. The trace has not been drawn there yet.</p>
-    <p>The slider above the figure strips the page back. At <strong>full</strong>, every annotation is shown. At <strong>minimal</strong>, only the bones remain: the trace, the ripple at 1880, a dot and short label for each moment, and the y-axis terms — celebrated, baseline, suppressed.</p>
+<div class="arc-hint" id="arc-hint" aria-hidden="true">Scroll to zoom · drag to pan</div>
 
-    <h2>Timeline</h2>
-    <ul>
-        <li><strong>c. 65,000 BP onwards</strong> — Aboriginal Australian presence on the continent. Aboriginal sign languages — Warlpiri, Yolngu, Arandic, Pitjantjatjara, Ngada, Western Desert and others — used in mourning rituals, hunting, ceremony, and across language groups.</li>
-        <li><strong>Deep past, parallel traditions</strong> — Plains Indian Sign Language (Hand Talk) as a lingua franca across many North American Plains nations.</li>
-        <li><strong>c. 1550</strong> — Pedro Ponce de León: first documented European deaf education.</li>
-        <li><strong>1620</strong> — Juan Pablo Bonet, <em>Reducción de las letras y arte para enseñar a hablar a los mudos</em>.</li>
-        <li><strong>1755</strong> — Abbé de l'Épée founds the first free school for the deaf in Paris; LSF as language of instruction.</li>
-        <li><strong>1760</strong> — Thomas Braidwood opens the first British school for the deaf in Edinburgh.</li>
-        <li><strong>1817</strong> — American School for the Deaf founded in Hartford by Gallaudet and Clerc; ASL emerges.</li>
-        <li><strong>1864</strong> — Gallaudet College chartered in Washington, DC.</li>
-        <li><strong>1880</strong> — <strong>Milan Congress.</strong> 164 hearing delegates vote to ban sign languages from deaf education in favour of oralism.</li>
-        <li><strong>1883</strong> — Alexander Graham Bell, <em>Memoir Upon the Formation of a Deaf Variety of the Human Race</em>; argues against deaf-deaf marriage, against deaf residential schools, against sign languages.</li>
-        <li><strong>1907</strong> — Indiana enacts the first US compulsory sterilisation law; deaf people among those targeted.</li>
-        <li><strong>Late 19th – mid 20th century</strong> — Australian assimilation policies and removal practices suppress Aboriginal languages, including Aboriginal sign systems.</li>
-        <li><strong>1933</strong> — Nazi Germany's <em>Law for the Prevention of Hereditarily Diseased Offspring</em>. ~17,000 deaf people sterilised.</li>
-        <li><strong>1939 – 1945</strong> — Aktion T4 and related programs murder thousands of deaf and disabled people.</li>
-        <li><strong>1960</strong> — William Stokoe, <em>Sign Language Structure</em>: ASL demonstrated as a fully grammatical natural language.</li>
-        <li><strong>1975</strong> — Auslan named and described as a distinct language.</li>
-        <li><strong>1988</strong> — Deaf President Now installs I. King Jordan as first deaf president of Gallaudet University.</li>
-        <li><strong>1995</strong> — Auslan recognised in Australia's national language policy.</li>
-        <li><strong>2003</strong> — NZSL recognised as an official language of New Zealand.</li>
-        <li><strong>2010</strong> — International Congress on Education of the Deaf issues <em>Statement of Principle and Accord for the Future</em>, formally rejecting and apologising for the 1880 resolutions.</li>
-        <li><strong>2020s</strong> — Ongoing recognition and documentation of Aboriginal sign language traditions.</li>
-        <li><strong>2026</strong> — The trace is rising. It is not yet at the line it left.</li>
-    </ul>
-
-    <h2>Notes on the diptych</h2>
-    <p>The digital trace covers minutes; the drawing covers tens of thousands of years. The cream and ink are shared. The orange band on this page — 1880 to 1945 — uses the same hue that marks the active 15-minute window in the digital piece. The single red mark at 1880 echoes the red dot at the start of every digital session: a moment of impact, the work coming into the room, the line breaking on the page.</p>
-
-    <p class="meta">Companion to the live trace · drafted 2026-05-06 · revise as the hand-drawn piece develops</p>
-</main>
-
-<footer class="site">
-    <span>&copy; 2026 Ravi Vasavan</span>
-    <span>
-        <a href="privacy.html">Privacy</a>
-        &nbsp;&middot;&nbsp;
-        <a href="support.html">Support</a>
-    </span>
-</footer>
+<div class="arc-controls">
+    <div class="group" role="group" aria-label="Zoom">
+        <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out">
+            <!-- Phosphor: minus -->
+            <svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg>
+        </button>
+        <button id="zoom-reset" type="button" aria-label="Reset view" title="Reset view">
+            <!-- Phosphor: arrows-clockwise -->
+            <svg viewBox="0 0 256 256" aria-hidden="true"><path d="M232,40v64a8,8,0,0,1-8,8H160a8,8,0,0,1,0-16h45.61L184.18,76.57A86.62,86.62,0,0,0,128,56h-.5a86.13,86.13,0,0,0-60.32,24.79,8,8,0,1,1-11.18-11.45A102,102,0,0,1,128,40h.51a102.49,102.49,0,0,1,67,24.85L216,84.92V40a8,8,0,0,1,16,0ZM188.34,186.21A85.92,85.92,0,0,1,128,200h-.49a86.59,86.59,0,0,1-56.18-20.57L50.39,160H96a8,8,0,0,0,0-16H32a8,8,0,0,0-8,8v64a8,8,0,0,0,16,0V171.08l20.52,20.07A102.59,102.59,0,0,0,127.5,216h.59a101.94,101.94,0,0,0,71.65-29.34,8,8,0,0,0-11.18-11.45Z"/></svg>
+        </button>
+        <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in">
+            <!-- Phosphor: plus -->
+            <svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+        </button>
+    </div>
+    <div class="group" role="group" aria-label="Detail level">
+        <span class="group-label">Detail</span>
+        <button class="detail-btn" type="button" data-detail="1" aria-label="Detail level: minimal" title="Minimal">1</button>
+        <button class="detail-btn" type="button" data-detail="2" aria-label="Detail level: context" title="Context">2</button>
+        <button class="detail-btn" type="button" data-detail="3" aria-label="Detail level: annotations" title="Annotations">3</button>
+        <button class="detail-btn" type="button" data-detail="4" aria-label="Detail level: full" title="Full" aria-pressed="true">4</button>
+    </div>
+</div>
 
 <script>
-    (function () {
-        var slider = document.getElementById('detail-slider');
-        var figure = document.querySelector('.arc-figure');
-        var output = document.getElementById('detail-output');
-        var labels = { '1': 'minimal', '2': 'context', '3': 'annotations', '4': 'full' };
-        function update() {
-            figure.setAttribute('data-detail', slider.value);
-            output.textContent = labels[slider.value];
+(function () {
+    var canvas = document.getElementById('arc-canvas');
+    var inner = document.getElementById('arc-canvas-inner');
+    var hint = document.getElementById('arc-hint');
+
+    var scale = 1;
+    var tx = 0;
+    var ty = 0;
+    var minScale = 0.4;
+    var maxScale = 12;
+
+    function apply() {
+        inner.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + scale + ')';
+    }
+
+    // Zoom around a viewport point (px, py).
+    function zoomAt(factor, px, py) {
+        var newScale = Math.max(minScale, Math.min(maxScale, scale * factor));
+        if (newScale === scale) return;
+        var ratio = newScale / scale;
+        tx = px - (px - tx) * ratio;
+        ty = py - (py - ty) * ratio;
+        scale = newScale;
+        apply();
+    }
+
+    function reset() {
+        scale = 1; tx = 0; ty = 0;
+        apply();
+    }
+
+    // Wheel — smooth zoom centred on cursor
+    canvas.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        var rect = canvas.getBoundingClientRect();
+        var px = e.clientX - rect.left;
+        var py = e.clientY - rect.top;
+        var factor = Math.exp(-e.deltaY * 0.0015);
+        zoomAt(factor, px, py);
+        fadeHint();
+    }, { passive: false });
+
+    // Mouse pan
+    var isPanning = false;
+    var panStart = { x: 0, y: 0, tx: 0, ty: 0 };
+
+    canvas.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        if (e.target.closest('.arc-title, .arc-nav, .arc-controls')) return;
+        isPanning = true;
+        canvas.classList.add('panning');
+        panStart.x = e.clientX;
+        panStart.y = e.clientY;
+        panStart.tx = tx;
+        panStart.ty = ty;
+        e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', function (e) {
+        if (!isPanning) return;
+        tx = panStart.tx + (e.clientX - panStart.x);
+        ty = panStart.ty + (e.clientY - panStart.y);
+        apply();
+        fadeHint();
+    });
+
+    window.addEventListener('mouseup', function () {
+        if (!isPanning) return;
+        isPanning = false;
+        canvas.classList.remove('panning');
+    });
+
+    // Touch — single-finger pan, two-finger pinch
+    var touchState = null;
+
+    canvas.addEventListener('touchstart', function (e) {
+        if (e.target.closest('.arc-title, .arc-nav, .arc-controls')) return;
+        if (e.touches.length === 1) {
+            touchState = {
+                type: 'pan',
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY,
+                tx: tx,
+                ty: ty
+            };
+        } else if (e.touches.length === 2) {
+            var t1 = e.touches[0], t2 = e.touches[1];
+            var dx = t2.clientX - t1.clientX;
+            var dy = t2.clientY - t1.clientY;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            touchState = {
+                type: 'pinch',
+                dist: dist,
+                cx: (t1.clientX + t2.clientX) / 2,
+                cy: (t1.clientY + t2.clientY) / 2,
+                scale: scale,
+                tx: tx,
+                ty: ty
+            };
         }
-        slider.addEventListener('input', update);
-        update();
-    })();
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', function (e) {
+        if (!touchState) return;
+        e.preventDefault();
+        if (touchState.type === 'pan' && e.touches.length === 1) {
+            tx = touchState.tx + (e.touches[0].clientX - touchState.x);
+            ty = touchState.ty + (e.touches[0].clientY - touchState.y);
+            apply();
+        } else if (touchState.type === 'pinch' && e.touches.length === 2) {
+            var t1 = e.touches[0], t2 = e.touches[1];
+            var dx = t2.clientX - t1.clientX;
+            var dy = t2.clientY - t1.clientY;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            var factor = dist / touchState.dist;
+            var newScale = Math.max(minScale, Math.min(maxScale, touchState.scale * factor));
+            var ratio = newScale / touchState.scale;
+            var rect = canvas.getBoundingClientRect();
+            var px = touchState.cx - rect.left;
+            var py = touchState.cy - rect.top;
+            tx = px - (px - touchState.tx) * ratio;
+            ty = py - (py - touchState.ty) * ratio;
+            scale = newScale;
+            apply();
+        }
+        fadeHint();
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', function () {
+        touchState = null;
+    });
+
+    // Zoom buttons — zoom from viewport centre
+    function centre() {
+        var rect = canvas.getBoundingClientRect();
+        return { x: rect.width / 2, y: rect.height / 2 };
+    }
+    document.getElementById('zoom-in').addEventListener('click', function () {
+        var c = centre();
+        zoomAt(1.25, c.x, c.y);
+    });
+    document.getElementById('zoom-out').addEventListener('click', function () {
+        var c = centre();
+        zoomAt(1 / 1.25, c.x, c.y);
+    });
+    document.getElementById('zoom-reset').addEventListener('click', function () {
+        reset();
+    });
+
+    // Detail buttons
+    var detailButtons = document.querySelectorAll('.detail-btn');
+    detailButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var level = btn.getAttribute('data-detail');
+            inner.setAttribute('data-detail', level);
+            detailButtons.forEach(function (b) {
+                if (b.getAttribute('data-detail') === level) {
+                    b.setAttribute('aria-pressed', 'true');
+                } else {
+                    b.removeAttribute('aria-pressed');
+                }
+            });
+        });
+    });
+
+    // Hint fade
+    var hintTimer;
+    function fadeHint() {
+        if (!hint || hint.classList.contains('faded')) return;
+        clearTimeout(hintTimer);
+        hint.classList.add('faded');
+    }
+    hintTimer = setTimeout(fadeHint, 4500);
+
+    // Keyboard
+    window.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        switch (e.key) {
+            case '+': case '=': zoomAt(1.25, centre().x, centre().y); break;
+            case '-': case '_': zoomAt(1 / 1.25, centre().x, centre().y); break;
+            case '0': reset(); break;
+            case '1': case '2': case '3': case '4':
+                inner.setAttribute('data-detail', e.key);
+                detailButtons.forEach(function (b) {
+                    if (b.getAttribute('data-detail') === e.key) {
+                        b.setAttribute('aria-pressed', 'true');
+                    } else {
+                        b.removeAttribute('aria-pressed');
+                    }
+                });
+                break;
+        }
+    });
+
+    apply();
+})();
 </script>
 
 </body>

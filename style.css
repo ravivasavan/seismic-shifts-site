@@ -94,6 +94,41 @@ header.site .site-title a {
 
 header.site .site-nav {
     display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Hamburger toggle — hidden on desktop, visible at <=720px */
+header.site .site-nav-toggle {
+    display: none;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--ink);
+    border-radius: 3px;
+    padding: 0;
+}
+header.site .site-nav-toggle:hover { background: rgba(26, 26, 26, 0.08); }
+header.site .site-nav-toggle:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
+header.site .site-nav-toggle svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    display: block;
+}
+header.site .site-nav-toggle .icon-close { display: none; }
+header.site .site-nav-toggle[aria-expanded="true"] .icon-list { display: none; }
+header.site .site-nav-toggle[aria-expanded="true"] .icon-close { display: block; }
+
+header.site .site-nav-menu {
+    display: flex;
     gap: 18px;
 }
 
@@ -237,15 +272,43 @@ li {
 }
 
 @media (max-width: 720px) {
-    header.site .site-nav { display: none; }
+    /* On mobile the nav pill collapses into a hamburger that
+       expands a vertical drawer below. */
+    header.site .site-nav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 6px;
+    }
+    header.site .site-nav-toggle {
+        display: flex;
+        align-self: flex-end;
+        width: 36px;
+        height: 36px;
+    }
+    header.site .site-nav-menu {
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 4px;
+        padding: 8px 12px 4px;
+        border-top: 1px solid var(--hairline);
+        text-align: right;
+    }
+    header.site .site-nav[data-open="true"] .site-nav-menu {
+        display: flex;
+    }
+    header.site .site-nav-menu a {
+        padding: 5px 0;
+        font-size: 0.78rem;
+    }
 }
 
 @media (max-width: 600px) {
     body { padding: 80px 20px 0; }
     main { padding: 24px 0 64px; }
     header.site { top: 16px; left: 16px; right: 16px; }
-    header.site .site-title,
-    header.site .site-nav { padding: 8px 12px; }
+    header.site .site-title { padding: 8px 12px; }
     header.site .site-icon { width: 20px; height: 20px; }
     h2 { margin-top: 40px; }
 }

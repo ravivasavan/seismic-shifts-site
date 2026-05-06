@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="nav.js" defer></script>
 <style>
     /* Formal museum-label treatment for the wall label and catalogue
        blocks. A thin hairline at left, a quiet cream-on-cream tint, and
@@ -65,11 +66,17 @@
         <a href="./">Seismic Shifts</a>
     </div>
     <nav class="site-nav" aria-label="Site">
-        <a href="./">Work</a>
-        <a href="description.html" aria-current="page">Description</a>
-        <a href="arc.html">Arc</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="support.html">Support</a>
+        <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-menu" aria-label="Open menu">
+            <svg class="icon-list" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></svg>
+            <svg class="icon-close" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+        </button>
+        <div class="site-nav-menu" id="site-nav-menu">
+            <a href="./">Work</a>
+            <a href="description.html" aria-current="page">Description</a>
+            <a href="arc.html">Arc</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="support.html">Support</a>
+        </div>
     </nav>
 </header>
 
@@ -136,9 +143,11 @@
         <li><strong>1960</strong> — William Stokoe, <em>Sign Language Structure</em>: ASL demonstrated as a fully grammatical natural language.</li>
         <li><strong>1975</strong> — Auslan named and described as a distinct language.</li>
         <li><strong>1988</strong> — Deaf President Now installs I. King Jordan as first deaf president of Gallaudet University.</li>
+        <li><strong>1990</strong> — Americans with Disabilities Act (ADA) signed into US law. Mandates access — interpreting services, captioning, telecommunications relay — and prohibits discrimination on the basis of disability.</li>
         <li><strong>1995</strong> — Auslan recognised in Australia's national language policy.</li>
         <li><strong>2003</strong> — NZSL recognised as an official language of New Zealand.</li>
         <li><strong>2010</strong> — International Congress on Education of the Deaf issues <em>Statement of Principle and Accord for the Future</em>, formally rejecting and apologising for the 1880 resolutions.</li>
+        <li><strong>2022</strong> — UK Parliament passes the British Sign Language Act, recognising BSL as a language of England, Wales and Scotland.</li>
         <li><strong>2020s</strong> — Ongoing recognition and documentation of Aboriginal sign language traditions.</li>
         <li><strong>2026</strong> — The trace is rising. It is not yet at the line it left.</li>
     </ul>

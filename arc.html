@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="nav.js" defer></script>
 <style>
     /* Override the standard body padding for the fullscreen canvas. */
     body.arc-body {
@@ -113,46 +114,90 @@
         fill: currentColor;
     }
 
-    /* Detail — slider with dot marks */
-    .detail-dots {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        height: 36px;
-        padding: 0 14px;
+    /* Detail — true slider with a draggable thumb, dot stops, and
+       a tooltip per stop. */
+    .detail-slider {
         position: relative;
+        width: 200px;
+        height: 36px;
+        cursor: pointer;
+        --pos: 1;
     }
-    .detail-dots::before {
-        content: "";
+    .detail-slider .track {
         position: absolute;
         top: 50%;
-        left: 18px;
-        right: 18px;
+        left: 14px;
+        right: 14px;
         height: 1px;
         background: var(--hairline);
-        z-index: 0;
         transform: translateY(-0.5px);
+        pointer-events: none;
     }
-    .detail-dots .dot {
-        width: 10px;
-        height: 10px;
+    .detail-slider .stop {
+        position: absolute;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        margin: -4px 0 0 -4px;
         padding: 0;
-        border-radius: 50%;
         border: 1px solid var(--ink);
+        border-radius: 50%;
         background: var(--paper);
         cursor: pointer;
-        flex: none;
-        position: relative;
         z-index: 1;
-        transition: transform 120ms ease, background-color 120ms ease;
-        font: 0/0 a; /* hide any text content */
+        box-sizing: border-box;
+        font: 0/0 a;
         color: transparent;
+        transition: transform 120ms ease;
     }
-    .detail-dots .dot:hover { transform: scale(1.45); }
-    .detail-dots .dot[aria-checked="true"] { background: var(--ink); }
-    .detail-dots .dot:focus-visible {
+    .detail-slider .stop[data-detail="1"] { left: 14px; }
+    .detail-slider .stop[data-detail="2"] { left: calc(14px + (100% - 28px) / 3); }
+    .detail-slider .stop[data-detail="3"] { left: calc(14px + 2 * (100% - 28px) / 3); }
+    .detail-slider .stop[data-detail="4"] { left: calc(100% - 14px); }
+    .detail-slider .stop:hover { transform: scale(1.5); }
+    .detail-slider .stop:focus-visible {
         outline: 2px solid var(--ink);
         outline-offset: 4px;
+    }
+    .detail-slider .stop::before {
+        content: attr(data-tip);
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: var(--paper);
+        padding: 5px 9px;
+        border-radius: 3px;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.6rem;
+        font-weight: 400;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 140ms ease;
+        z-index: 4;
+    }
+    .detail-slider .stop:hover::before,
+    .detail-slider .stop:focus-visible::before {
+        opacity: 1;
+    }
+    .detail-slider .thumb {
+        position: absolute;
+        top: 50%;
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+        border-radius: 50%;
+        background: var(--ink);
+        border: 1px solid var(--ink);
+        box-sizing: border-box;
+        pointer-events: none;
+        z-index: 2;
+        left: calc(14px + var(--pos) * (100% - 28px));
+        transition: left 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     /* Subtle interaction hint — fades after a few seconds */
@@ -192,11 +237,17 @@
         <a href="./">Seismic Shifts</a>
     </div>
     <nav class="site-nav" aria-label="Site">
-        <a href="./">Work</a>
-        <a href="description.html">Description</a>
-        <a href="arc.html" aria-current="page">Arc</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="support.html">Support</a>
+        <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-menu" aria-label="Open menu">
+            <svg class="icon-list" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></svg>
+            <svg class="icon-close" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+        </button>
+        <div class="site-nav-menu" id="site-nav-menu">
+            <a href="./">Work</a>
+            <a href="description.html">Description</a>
+            <a href="arc.html" aria-current="page">Arc</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="support.html">Support</a>
+        </div>
     </nav>
 </header>
 
@@ -302,14 +353,15 @@
             <text x="932" y="170">SLOW RECOVERY</text>
         </g>
 
-        <!-- The trace -->
+        <!-- The trace. ADA 1990 sits between DPN and Auslan-recognised;
+             the BSL Act 2022 produces a final uptick into today. -->
         <polyline
             points="
                 80,408 134,400 206,406 278,396 350,404 422,398 494,402
                 555,402 591,398 656,388 661,386 666,384 721,374 766,370
                 781,368 782,548 793,600 814,640 834,668 844,700 855,718
-                859,690 886,602 895,556 913,510 937,470 950,446 964,432
-                977,425 1006,425
+                859,690 886,602 895,556 913,510 937,470 941,463 950,446
+                964,432 977,425 999,415 1006,415
             "
             fill="none" stroke="#1A1A1A" stroke-width="1.6"
             stroke-linejoin="round" stroke-linecap="round"/>
@@ -526,6 +578,18 @@
               font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
               font-size="4.8" text-anchor="middle" fill="#1A1A1A">1988 — DEAF PRESIDENT NOW</text>
 
+        <!-- ADA 1990 — Americans with Disabilities Act -->
+        <circle cx="941" cy="463" r="1.8" fill="#1A1A1A"/>
+        <line x1="941" y1="461" x2="941" y2="418" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
+        <text x="945" y="412"
+              font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+              font-size="4.8" text-anchor="start" fill="#1A1A1A">1990 — ADA</text>
+        <text class="from-l4" x="945" y="403"
+              font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+              font-style="italic" font-size="6.0" text-anchor="start" fill="#1A1A1A" opacity="0.8">
+            Americans with Disabilities Act
+        </text>
+
         <!-- Auslan recognised 1995 -->
         <circle cx="950" cy="446" r="1.8" fill="#1A1A1A"/>
         <line x1="950" y1="448" x2="950" y2="498" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
@@ -552,9 +616,21 @@
             rejection of the 1880 resolutions
         </text>
 
+        <!-- BSL Act 2022 — final uptick into today -->
+        <circle cx="999" cy="415" r="1.8" fill="#1A1A1A"/>
+        <line x1="999" y1="417" x2="999" y2="462" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
+        <text x="999" y="472"
+              font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+              font-size="4.8" text-anchor="middle" fill="#1A1A1A">2022 — BSL ACT</text>
+        <text class="from-l3" x="999" y="481"
+              font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+              font-style="italic" font-size="6.0" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
+            BSL recognised in the UK
+        </text>
+
         <!-- Today marker -->
-        <circle cx="1006" cy="425" r="2.6" fill="#1A1A1A"/>
-        <line x1="1006" y1="425" x2="1006" y2="400"
+        <circle cx="1006" cy="415" r="2.6" fill="#1A1A1A"/>
+        <line x1="1006" y1="415" x2="1006" y2="400"
               stroke="#1A1A1A" stroke-width="0.4" stroke-dasharray="1.2 1.6" opacity="0.55"/>
         <text x="1000" y="394"
               font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
@@ -618,11 +694,16 @@
     </div>
     <div class="group" role="group" aria-label="Detail level">
         <span class="group-label">Detail</span>
-        <div class="detail-dots" role="radiogroup" aria-label="Detail level">
-            <button class="dot" type="button" data-detail="1" role="radio" aria-checked="false" aria-label="Detail level: minimal" title="Minimal"></button>
-            <button class="dot" type="button" data-detail="2" role="radio" aria-checked="false" aria-label="Detail level: context" title="Context"></button>
-            <button class="dot" type="button" data-detail="3" role="radio" aria-checked="false" aria-label="Detail level: annotations" title="Annotations"></button>
-            <button class="dot" type="button" data-detail="4" role="radio" aria-checked="true" aria-label="Detail level: full" title="Full"></button>
+        <div class="detail-slider" id="detail-slider"
+             role="slider" tabindex="0"
+             aria-label="Detail level"
+             aria-valuemin="1" aria-valuemax="4" aria-valuenow="4" aria-valuetext="Full">
+            <div class="track"></div>
+            <button class="stop" type="button" data-detail="1" data-tip="Minimal" aria-label="Detail: Minimal"></button>
+            <button class="stop" type="button" data-detail="2" data-tip="Context" aria-label="Detail: Context"></button>
+            <button class="stop" type="button" data-detail="3" data-tip="Annotations" aria-label="Detail: Annotations"></button>
+            <button class="stop" type="button" data-detail="4" data-tip="Full" aria-label="Detail: Full"></button>
+            <div class="thumb" aria-hidden="true"></div>
         </div>
     </div>
 </div>
@@ -834,20 +915,87 @@
     });
 
     // ============================================================
-    // Detail dots
+    // Detail — slider with draggable thumb, dot stops, tooltip per stop
     // ============================================================
-    var dots = document.querySelectorAll('.detail-dots .dot');
+    var slider = document.getElementById('detail-slider');
+    var stops = slider.querySelectorAll('.stop');
+    var detailLabels = ['', 'Minimal', 'Context', 'Annotations', 'Full'];
+    var sliderDragging = false;
+
     function setDetail(level) {
-        svg.setAttribute('data-detail', String(level));
-        dots.forEach(function (d) {
-            d.setAttribute('aria-checked', d.getAttribute('data-detail') === String(level) ? 'true' : 'false');
-        });
+        var l = parseInt(level, 10);
+        if (isNaN(l) || l < 1 || l > 4) return;
+        svg.setAttribute('data-detail', String(l));
+        slider.setAttribute('aria-valuenow', String(l));
+        slider.setAttribute('aria-valuetext', detailLabels[l]);
+        slider.style.setProperty('--pos', (l - 1) / 3);
     }
-    dots.forEach(function (d) {
-        d.addEventListener('click', function () {
-            setDetail(d.getAttribute('data-detail'));
+
+    function levelFromX(x) {
+        var rect = slider.getBoundingClientRect();
+        var trackLeft = rect.left + 14;
+        var trackRight = rect.right - 14;
+        var range = trackRight - trackLeft;
+        if (range <= 0) return 1;
+        var pos = (x - trackLeft) / range;
+        pos = Math.max(0, Math.min(1, pos));
+        return Math.round(pos * 3) + 1;
+    }
+
+    stops.forEach(function (s) {
+        s.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setDetail(s.getAttribute('data-detail'));
         });
     });
+
+    slider.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        if (e.target.classList.contains('stop')) return;
+        sliderDragging = true;
+        setDetail(levelFromX(e.clientX));
+        e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', function (e) {
+        if (!sliderDragging) return;
+        setDetail(levelFromX(e.clientX));
+    });
+
+    window.addEventListener('mouseup', function () {
+        sliderDragging = false;
+    });
+
+    slider.addEventListener('touchstart', function (e) {
+        if (e.target.classList.contains('stop')) return;
+        sliderDragging = true;
+        setDetail(levelFromX(e.touches[0].clientX));
+    }, { passive: true });
+
+    slider.addEventListener('touchmove', function (e) {
+        if (!sliderDragging) return;
+        e.preventDefault();
+        setDetail(levelFromX(e.touches[0].clientX));
+    }, { passive: false });
+
+    slider.addEventListener('touchend', function () { sliderDragging = false; });
+
+    slider.addEventListener('keydown', function (e) {
+        var current = parseInt(slider.getAttribute('aria-valuenow') || '4', 10);
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+            setDetail(Math.max(1, current - 1));
+            e.preventDefault();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+            setDetail(Math.min(4, current + 1));
+            e.preventDefault();
+        } else if (e.key === 'Home') {
+            setDetail(1); e.preventDefault();
+        } else if (e.key === 'End') {
+            setDetail(4); e.preventDefault();
+        }
+    });
+
+    setDetail(4);
 
     // ============================================================
     // Hint fade

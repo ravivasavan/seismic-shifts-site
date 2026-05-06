@@ -1,12 +1,13 @@
 # seismic-shifts-site
 
-Marketing, privacy, and support pages for **Seismic Shifts** — an iPad app
-that listens to a room and renders its acoustic energy as a slowly
-scrolling seismograph trace.
+Marketing, privacy, and support pages for **Seismic Shifts** — a digital
+and interactive work that listens to the room it is in and its
+surrounds, and renders that acoustic energy as a slowly scrolling
+seismograph trace.
 
 **Live at:** https://ravivasavan.github.io/seismic-shifts-site/
 
-App source code is in the companion repo:
+Source code for the work is in the companion repo:
 [ravivasavan/seismic-shifts-app](https://github.com/ravivasavan/seismic-shifts-app).
 
 This site is plain HTML + CSS served from the `main` branch root via
@@ -15,8 +16,9 @@ GitHub Pages. No build step.
 ## Pages
 
 - `index.html` — about the work
-- `privacy.html` — privacy policy (used as the App Store privacy URL)
-- `support.html` — support page (used as the App Store support URL)
+- `arc.html` — the long-arc digital companion to the live trace
+- `privacy.html` — privacy policy (linked as the privacy URL in the work's distribution metadata)
+- `support.html` — support page (linked as the support URL in the work's distribution metadata)
 
 ## Typography
 

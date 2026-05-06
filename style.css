@@ -26,7 +26,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 0 32px;
+    padding: 96px 32px 0;
 }
 
 main {
@@ -34,37 +34,77 @@ main {
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
-    padding: 64px 0 96px;
+    padding: 32px 0 96px;
 }
 
+/* Floating pill nav — fixed at top, two translucent cream pills with
+   a hairline border. Title pill (icon + name) on the left, nav pill
+   on the right. Wraps on small viewports; nav pill hides on phones. */
 header.site {
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 32px 0 24px;
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    z-index: 20;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    border-bottom: none;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    border-bottom: 1px solid var(--hairline);
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    pointer-events: none;
     font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
 }
 
-header.site a {
+header.site .site-title,
+header.site .site-nav {
+    background: rgba(244, 239, 230, 0.86);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 9px 16px;
+    pointer-events: auto;
+}
+
+header.site .site-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+header.site .site-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: block;
+    flex: none;
+}
+
+header.site .site-title a {
     color: var(--ink);
     text-decoration: none;
 }
 
-header.site nav a {
-    margin-left: 32px;
+header.site .site-nav {
+    display: flex;
+    gap: 18px;
+}
+
+header.site .site-nav a {
     color: var(--ink-quiet);
+    text-decoration: none;
     transition: color 120ms ease;
 }
 
-header.site nav a:hover,
-header.site nav a[aria-current="page"] {
+header.site .site-nav a:hover,
+header.site .site-nav a[aria-current="page"] {
     color: var(--ink);
 }
 
@@ -196,10 +236,16 @@ li {
     height: auto;
 }
 
+@media (max-width: 720px) {
+    header.site .site-nav { display: none; }
+}
+
 @media (max-width: 600px) {
-    body { padding: 0 20px; }
-    main { padding: 40px 0 64px; }
-    header.site { padding: 20px 0 16px; flex-direction: column; gap: 12px; }
-    header.site nav a:first-child { margin-left: 0; }
+    body { padding: 80px 20px 0; }
+    main { padding: 24px 0 64px; }
+    header.site { top: 16px; left: 16px; right: 16px; }
+    header.site .site-title,
+    header.site .site-nav { padding: 8px 12px; }
+    header.site .site-icon { width: 20px; height: 20px; }
     h2 { margin-top: 40px; }
 }

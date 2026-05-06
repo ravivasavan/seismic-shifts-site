@@ -23,7 +23,7 @@
         left: 50%;
         transform: translateX(-50%);
         width: min(calc(100vw - 64px), 1280px);
-        margin: 40px 0 56px;
+        margin: 16px 0 56px;
     }
     .arc-figure {
         width: 100%;
@@ -48,8 +48,50 @@
         padding: 14px 20px 18px;
         border-top: 1px solid var(--hairline);
     }
+
+    /* Detail slider — quiet control above the figure. */
+    .detail-control {
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(calc(100vw - 64px), 1280px);
+        margin: 32px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--ink-quiet);
+    }
+    .detail-control .label { flex: none; color: var(--ink); }
+    .detail-control input[type="range"] {
+        flex: 1;
+        max-width: 360px;
+        accent-color: var(--ink);
+    }
+    .detail-control output {
+        flex: none;
+        color: var(--ink);
+        min-width: 8em;
+    }
+
+    /* Conditional visibility — driven by data-detail on .arc-figure.
+       Levels: 1 minimal · 2 context · 3 annotations · 4 full. */
+    .arc-figure[data-detail="1"] .from-l2,
+    .arc-figure[data-detail="1"] .from-l3,
+    .arc-figure[data-detail="1"] .from-l4,
+    .arc-figure[data-detail="2"] .from-l3,
+    .arc-figure[data-detail="2"] .from-l4,
+    .arc-figure[data-detail="3"] .from-l4 {
+        display: none;
+    }
+
     @media (max-width: 600px) {
         .arc-wrap { width: min(calc(100vw - 40px), 1280px); }
+        .detail-control { width: min(calc(100vw - 40px), 1280px); flex-wrap: wrap; gap: 10px; }
+        .detail-control input[type="range"] { max-width: 100%; }
     }
 </style>
 </head>
@@ -72,8 +114,14 @@
 
     <p>The hand-drawn ink companion to <em>Seismic Shifts</em> sits at A0, landscape, beside the digital screen. It traces the presence of Deaf life and signed languages across the long arc — from the deep continuity of Aboriginal sign languages to the seismic moments that have shaped, and unmade, that presence. The page below is its digital draft.</p>
 
+<div class="detail-control">
+    <span class="label">Detail</span>
+    <input type="range" id="detail-slider" min="1" max="4" value="4" step="1" aria-describedby="detail-output" aria-label="Level of detail shown on the long-arc figure">
+    <output id="detail-output" for="detail-slider">full</output>
+</div>
+
 <div class="arc-wrap">
-    <figure class="arc-figure">
+    <figure class="arc-figure" data-detail="4">
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 1189 841"
              preserveAspectRatio="xMidYMid meet"
@@ -95,7 +143,8 @@
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="18" fill="#1A1A1A" opacity="0.8">A long arc — 65,000 years of presence and the seismic moments that have shaped it</text>
 
-            <g font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+            <g class="from-l4"
+               font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                font-size="6.2" letter-spacing="1.4" fill="#1A1A1A" opacity="0.55">
                 <text x="1129" y="58" text-anchor="end">A0 / 1189 × 841 MM / LANDSCAPE</text>
                 <text x="1129" y="72" text-anchor="end">RAVI VASAVAN / 2026</text>
@@ -103,40 +152,36 @@
                 <text x="1129" y="100" text-anchor="end">DEAF LIFE &amp; SIGNED LANGUAGES — PRESENCE OVER TIME</text>
             </g>
 
-            <!-- ============================================================
-                 Trace area: x = 80 .. 1006 (today), then 1006 .. 1109 blank
-                 (10% right margin = unwritten near future).
-                 Baseline: y = 400.
-                 ============================================================ -->
-
-            <!-- Eugenics-era band (1880 .. 1945) — orange echo of digital viewport -->
+            <!-- Eugenics-era orange band: rect always present (visual context),
+                 label is from-l2. -->
             <rect x="782" y="130" width="77" height="590" fill="#DB732E" opacity="0.10"/>
-            <text x="820.5" y="150"
+            <text class="from-l2" x="820.5" y="150"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.4" letter-spacing="1.6" text-anchor="middle"
                   fill="#9A4E1F" opacity="0.95">EUGENICS ERA</text>
 
-            <!-- Unwritten future zone — right 10% blank but quietly noted -->
+            <!-- Unwritten future zone — faint background and dashed line always;
+                 detailed labels at higher levels. -->
             <rect x="1006" y="130" width="103" height="590" fill="#1A1A1A" opacity="0.018"/>
             <line x1="1006" y1="130" x2="1006" y2="720"
                   stroke="#1A1A1A" stroke-width="0.4" stroke-dasharray="1.2 2.0" opacity="0.45"/>
-            <text x="1057" y="180"
+            <text class="from-l2" x="1057" y="180"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.4" letter-spacing="1.8" text-anchor="middle"
                   fill="#1A1A1A" opacity="0.55">UNWRITTEN</text>
-            <text x="1057" y="196"
+            <text class="from-l3" x="1057" y="196"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="8" text-anchor="middle"
                   fill="#1A1A1A" opacity="0.7">the near future,
             </text>
-            <text x="1057" y="208"
+            <text class="from-l3" x="1057" y="208"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="8" text-anchor="middle"
                   fill="#1A1A1A" opacity="0.7">not yet drawn</text>
 
-            <!-- Faint above/below baseline guides -->
-            <rect x="80" y="130" width="926" height="270" fill="#1A1A1A" opacity="0.015"/>
-            <rect x="80" y="400" width="926" height="320" fill="#1A1A1A" opacity="0.030"/>
+            <!-- Faint above/below baseline guides — pure decoration, full detail only -->
+            <rect class="from-l4" x="80" y="130" width="926" height="270" fill="#1A1A1A" opacity="0.015"/>
+            <rect class="from-l4" x="80" y="400" width="926" height="320" fill="#1A1A1A" opacity="0.030"/>
 
             <!-- Baseline -->
             <line x1="80" y1="400" x2="1006" y2="400"
@@ -147,28 +192,30 @@
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.6" text-anchor="end" fill="#1A1A1A" opacity="0.7"
                   letter-spacing="0.8">BASELINE</text>
-            <text x="68" y="410"
+            <text class="from-l4" x="68" y="410"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="4.4" text-anchor="end" fill="#1A1A1A" opacity="0.5"
                   letter-spacing="0.6">historical norm</text>
 
-            <!-- Y-axis qualitative labels -->
+            <!-- Y-axis qualitative labels: CELEBRATED · BASELINE · SUPPRESSED.
+                 These are the always-visible y-axis terms. -->
             <g font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                font-size="5.2" fill="#1A1A1A" opacity="0.55" letter-spacing="1.2">
-                <text x="68" y="190" text-anchor="end">PRESENT — RECOGNISED</text>
+                <text x="68" y="190" text-anchor="end">CELEBRATED</text>
                 <text x="68" y="610" text-anchor="end">SUPPRESSED</text>
             </g>
 
-            <!-- Era separators -->
-            <g stroke="#1A1A1A" stroke-width="0.3" stroke-dasharray="1.2 2.4" opacity="0.20">
+            <!-- Era separators — context level -->
+            <g class="from-l2" stroke="#1A1A1A" stroke-width="0.3" stroke-dasharray="1.2 2.4" opacity="0.20">
                 <line x1="278" y1="130" x2="278" y2="720"/>
                 <line x1="530" y1="130" x2="530" y2="720"/>
                 <line x1="656" y1="130" x2="656" y2="720"/>
                 <line x1="859" y1="130" x2="859" y2="720"/>
             </g>
 
-            <!-- Era band labels -->
-            <g font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+            <!-- Era band labels — context level -->
+            <g class="from-l2"
+               font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                font-size="5.6" letter-spacing="1.6" fill="#1A1A1A" opacity="0.6"
                text-anchor="middle">
                 <text x="179" y="170">DEEP CONTINUITY</text>
@@ -217,32 +264,41 @@
                 stroke-linejoin="round" stroke-linecap="round"/>
 
             <!-- ============================================================
-                 Aboriginal sign languages banner
+                 Aboriginal sign languages banner — full detail only
                  ============================================================ -->
-            <line x1="115" y1="240" x2="115" y2="404" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
-            <line x1="115" y1="240" x2="350" y2="240" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
-            <line x1="350" y1="240" x2="350" y2="404" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
-            <text x="232" y="225"
-                  font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
-                  font-style="italic" font-size="11" text-anchor="middle" fill="#1A1A1A">
-                Aboriginal sign languages — Warlpiri, Yolngu, Arandic, Pitjantjatjara, Ngada, Western Desert
-            </text>
-            <text x="232" y="262"
-                  font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
-                  font-size="5.0" text-anchor="middle" fill="#1A1A1A" opacity="0.7"
-                  letter-spacing="0.9">c. 65,000 BP — continuous transmission</text>
+            <g class="from-l4">
+                <line x1="115" y1="240" x2="115" y2="404" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
+                <line x1="115" y1="240" x2="350" y2="240" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
+                <line x1="350" y1="240" x2="350" y2="404" stroke="#1A1A1A" stroke-width="0.3" opacity="0.4"/>
+                <text x="232" y="225"
+                      font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+                      font-style="italic" font-size="11" text-anchor="middle" fill="#1A1A1A">
+                    Aboriginal sign languages — Warlpiri, Yolngu, Arandic, Pitjantjatjara, Ngada, Western Desert
+                </text>
+                <text x="232" y="262"
+                      font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+                      font-size="5.0" text-anchor="middle" fill="#1A1A1A" opacity="0.7"
+                      letter-spacing="0.9">c. 65,000 BP — continuous transmission</text>
+            </g>
 
-            <!-- Plains Indian Sign Language -->
-            <text x="404" y="280"
-                  font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
-                  font-style="italic" font-size="9" text-anchor="middle" fill="#1A1A1A" opacity="0.85">
-                Plains Indian Sign Language — Hand Talk
-            </text>
-            <text x="404" y="295"
-                  font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
-                  font-size="4.4" text-anchor="middle" fill="#1A1A1A" opacity="0.55"
-                  letter-spacing="0.8">parallel deep-time signing tradition</text>
-            <line x1="404" y1="300" x2="404" y2="395" stroke="#1A1A1A" stroke-width="0.3" opacity="0.30"/>
+            <!-- Plains Indian Sign Language — full detail only -->
+            <g class="from-l4">
+                <text x="404" y="280"
+                      font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+                      font-style="italic" font-size="9" text-anchor="middle" fill="#1A1A1A" opacity="0.85">
+                    Plains Indian Sign Language — Hand Talk
+                </text>
+                <text x="404" y="295"
+                      font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+                      font-size="4.4" text-anchor="middle" fill="#1A1A1A" opacity="0.55"
+                      letter-spacing="0.8">parallel deep-time signing tradition</text>
+                <line x1="404" y1="300" x2="404" y2="395" stroke="#1A1A1A" stroke-width="0.3" opacity="0.30"/>
+            </g>
+
+            <!-- ============================================================
+                 Events — each has dot + short year-name label always visible.
+                 Italic descriptors and decorative subtexts are level-3 or 4.
+                 ============================================================ -->
 
             <!-- Ponce de León c.1550 -->
             <circle cx="555" cy="402" r="1.8" fill="#1A1A1A"/>
@@ -250,7 +306,7 @@
             <text x="555" y="368"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.0" text-anchor="middle" fill="#1A1A1A">c. 1550 — PONCE DE LEÓN</text>
-            <text x="555" y="358"
+            <text class="from-l3" x="555" y="358"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="7" text-anchor="middle" fill="#1A1A1A" opacity="0.7">
                 first documented European deaf education
@@ -262,7 +318,7 @@
             <text x="591" y="332"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.0" text-anchor="middle" fill="#1A1A1A">1620 — BONET</text>
-            <text x="591" y="322"
+            <text class="from-l3" x="591" y="322"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="7" text-anchor="middle" fill="#1A1A1A" opacity="0.7">
                 first treatise on deaf education; manual alphabet
@@ -274,7 +330,7 @@
             <text x="661" y="299"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.0" text-anchor="middle" fill="#1A1A1A">1755 — L'ÉPÉE</text>
-            <text x="661" y="289"
+            <text class="from-l3" x="661" y="289"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="7" text-anchor="middle" fill="#1A1A1A" opacity="0.7">
                 first free school for the deaf, Paris; LSF as language of instruction
@@ -285,7 +341,7 @@
             <text x="721" y="262"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.0" text-anchor="middle" fill="#1A1A1A">1817 — HARTFORD</text>
-            <text x="721" y="252"
+            <text class="from-l3" x="721" y="252"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="7" text-anchor="middle" fill="#1A1A1A" opacity="0.7">
                 American School for the Deaf; ASL emerges
@@ -297,7 +353,7 @@
             <text x="766" y="312"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.0" text-anchor="middle" fill="#1A1A1A">1864 — GALLAUDET COLLEGE</text>
-            <text x="766" y="302"
+            <text class="from-l3" x="766" y="302"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="7" text-anchor="middle" fill="#1A1A1A" opacity="0.7">
                 Washington, DC — chartered
@@ -305,8 +361,7 @@
             <line x1="766" y1="316" x2="766" y2="368" stroke="#1A1A1A" stroke-width="0.25" opacity="0.30"/>
 
             <!-- ============================================================
-                 1880 — THE BREAK. Pen red, echoing the digital piece's
-                 session-start dot. Concentric ripples for emphasis.
+                 1880 — THE BREAK. Always visible at all detail levels.
                  ============================================================ -->
             <line x1="782" y1="130" x2="782" y2="720"
                   stroke="#C72E1F" stroke-width="0.8" opacity="0.55"/>
@@ -322,41 +377,45 @@
                   font-size="6.2" text-anchor="middle" fill="#1A1A1A" letter-spacing="1.0">
                 MILAN CONGRESS
             </text>
-            <text x="782" y="234"
-                  font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
-                  font-style="italic" font-size="8.5" text-anchor="middle" fill="#1A1A1A" opacity="0.85">
-                164 hearing delegates vote to ban sign languages
-            </text>
-            <text x="782" y="246"
-                  font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
-                  font-style="italic" font-size="8.5" text-anchor="middle" fill="#1A1A1A" opacity="0.85">
-                from deaf education in favour of oralism
-            </text>
+            <g class="from-l3">
+                <text x="782" y="234"
+                      font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+                      font-style="italic" font-size="8.5" text-anchor="middle" fill="#1A1A1A" opacity="0.85">
+                    164 hearing delegates vote to ban sign languages
+                </text>
+                <text x="782" y="246"
+                      font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+                      font-style="italic" font-size="8.5" text-anchor="middle" fill="#1A1A1A" opacity="0.85">
+                    from deaf education in favour of oralism
+                </text>
+            </g>
 
             <!-- ============================================================
-                 Eugenics-era event labels (below the trace)
+                 Eugenics-era event labels
                  ============================================================ -->
 
-            <!-- AGB Memoir 1883 -->
+            <!-- AGB Memoir 1883 — dot+short label always; long Memoir text full detail only -->
             <circle cx="793" cy="600" r="1.8" fill="#1A1A1A"/>
             <line x1="793" y1="602" x2="793" y2="630" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
             <text x="793" y="640"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="4.8" text-anchor="middle" fill="#1A1A1A">1883 — AGB</text>
-            <text x="793" y="649"
-                  font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
-                  font-style="italic" font-size="6.4" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
-                Memoir Upon the Formation
-            </text>
-            <text x="793" y="657"
-                  font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
-                  font-style="italic" font-size="6.4" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
-                of a Deaf Variety…
-            </text>
-            <text x="793" y="668"
-                  font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
-                  font-size="4.4" text-anchor="middle" fill="#1A1A1A" opacity="0.55"
-                  letter-spacing="0.6">Bell &amp; contemporaries</text>
+            <g class="from-l4">
+                <text x="793" y="649"
+                      font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+                      font-style="italic" font-size="6.4" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
+                    Memoir Upon the Formation
+                </text>
+                <text x="793" y="657"
+                      font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
+                      font-style="italic" font-size="6.4" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
+                    of a Deaf Variety…
+                </text>
+                <text x="793" y="668"
+                      font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+                      font-size="4.4" text-anchor="middle" fill="#1A1A1A" opacity="0.55"
+                      letter-spacing="0.6">Bell &amp; contemporaries</text>
+            </g>
 
             <!-- Indiana sterilisation 1907 -->
             <circle cx="814" cy="640" r="1.8" fill="#1A1A1A"/>
@@ -364,43 +423,48 @@
             <text x="814" y="694"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="4.8" text-anchor="middle" fill="#1A1A1A">1907 — INDIANA</text>
-            <text x="814" y="703"
+            <text class="from-l3" x="814" y="703"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="6.4" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
                 first US sterilisation law
             </text>
 
-            <!-- Australian assimilation policies (range bracket) -->
-            <line x1="816" y1="740" x2="902" y2="740" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
-            <line x1="816" y1="737" x2="816" y2="743" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
-            <line x1="902" y1="737" x2="902" y2="743" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
-            <text x="859" y="753"
-                  font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
-                  font-size="4.8" text-anchor="middle" fill="#1A1A1A">AUSTRALIAN ASSIMILATION POLICIES</text>
-            <text x="859" y="762"
+            <!-- Australian assimilation policies (range bracket) — annotations level -->
+            <g class="from-l3">
+                <line x1="816" y1="740" x2="902" y2="740" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
+                <line x1="816" y1="737" x2="816" y2="743" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
+                <line x1="902" y1="737" x2="902" y2="743" stroke="#1A1A1A" stroke-width="0.4" opacity="0.6"/>
+                <text x="859" y="753"
+                      font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+                      font-size="4.8" text-anchor="middle" fill="#1A1A1A">AUSTRALIAN ASSIMILATION POLICIES</text>
+            </g>
+            <text class="from-l4" x="859" y="762"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="6.0" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
                 suppression of Aboriginal languages, including Aboriginal sign systems
             </text>
 
-            <!-- Nazi 1933 + Aktion T4 1939-45 (clustered) -->
+            <!-- Nazi 1933 + Aktion T4 1939-45 cluster.
+                 Dots always; leader line + cluster labels are annotations level. -->
             <circle cx="844" cy="700" r="1.8" fill="#1A1A1A"/>
             <circle cx="855" cy="718" r="2.2" fill="#1A1A1A"/>
-            <line x1="850" y1="720" x2="888" y2="788" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
-            <text x="892" y="794"
-                  font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
-                  font-size="4.8" text-anchor="start" fill="#1A1A1A">1933 — NAZI STERILISATION LAW</text>
-            <text x="892" y="803"
-                  font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
-                  font-size="4.8" text-anchor="start" fill="#1A1A1A">1939–45 — AKTION T4</text>
-            <text x="892" y="813"
+            <g class="from-l3">
+                <line x1="850" y1="720" x2="888" y2="788" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
+                <text x="892" y="794"
+                      font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+                      font-size="4.8" text-anchor="start" fill="#1A1A1A">1933 — NAZI STERILISATION LAW</text>
+                <text x="892" y="803"
+                      font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+                      font-size="4.8" text-anchor="start" fill="#1A1A1A">1939–45 — AKTION T4</text>
+            </g>
+            <text class="from-l4" x="892" y="813"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="6.0" text-anchor="start" fill="#1A1A1A" opacity="0.8">
                 ~17,000 deaf people sterilised; thousands murdered
             </text>
 
             <!-- ============================================================
-                 Slow recovery — events along the rising trace
+                 Slow recovery
                  ============================================================ -->
 
             <!-- Stokoe 1960 -->
@@ -409,7 +473,7 @@
             <text x="886" y="560"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="4.8" text-anchor="middle" fill="#1A1A1A">1960 — STOKOE</text>
-            <text x="886" y="551"
+            <text class="from-l3" x="886" y="551"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="6.0" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
                 ASL shown to be a natural language
@@ -429,7 +493,7 @@
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="4.8" text-anchor="middle" fill="#1A1A1A">1988 — DEAF PRESIDENT NOW</text>
 
-            <!-- Auslan recognised 1995 (label below) -->
+            <!-- Auslan recognised 1995 -->
             <circle cx="950" cy="446" r="1.8" fill="#1A1A1A"/>
             <line x1="950" y1="448" x2="950" y2="498" stroke="#1A1A1A" stroke-width="0.3" opacity="0.45"/>
             <text x="950" y="508"
@@ -449,27 +513,27 @@
             <text x="977" y="592"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="4.8" text-anchor="middle" fill="#1A1A1A">2010 — ICED APOLOGY</text>
-            <text x="977" y="601"
+            <text class="from-l3" x="977" y="601"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="6.0" text-anchor="middle" fill="#1A1A1A" opacity="0.8">
                 rejection of the 1880 resolutions
             </text>
 
-            <!-- Today marker — sits at 90% (x=1006), entrance to unwritten zone -->
+            <!-- Today marker -->
             <circle cx="1006" cy="425" r="2.6" fill="#1A1A1A"/>
             <line x1="1006" y1="425" x2="1006" y2="400"
                   stroke="#1A1A1A" stroke-width="0.4" stroke-dasharray="1.2 1.6" opacity="0.55"/>
             <text x="1000" y="394"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.6" text-anchor="end" fill="#1A1A1A" letter-spacing="0.8">2026 — TODAY</text>
-            <text x="1000" y="384"
+            <text class="from-l3" x="1000" y="384"
                   font-family="'Instrument Serif', Georgia, 'Times New Roman', serif"
                   font-style="italic" font-size="7" text-anchor="end" fill="#1A1A1A" opacity="0.8">
                 not yet at the line it left
             </text>
 
             <!-- ============================================================
-                 Time axis
+                 Time axis — always visible at all detail levels
                  ============================================================ -->
             <line x1="80" y1="730" x2="1109" y2="730"
                   stroke="#1A1A1A" stroke-width="0.5" opacity="0.7"/>
@@ -481,7 +545,7 @@
                 <line x1="656"  y1="730" x2="656"  y2="738"/>
                 <line x1="782"  y1="730" x2="782"  y2="740" stroke="#C72E1F" stroke-width="0.8" opacity="0.85"/>
                 <line x1="859"  y1="730" x2="859"  y2="738"/>
-                <line x1="1006" y1="730" x2="1006" y2="740"/>
+                <line x1="1006" y1="730" x2="1006" y2="738"/>
             </g>
 
             <g font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
@@ -493,15 +557,15 @@
                 <text x="782"  y="752" text-anchor="middle" fill="#C72E1F">1880</text>
                 <text x="859"  y="752" text-anchor="middle">1945</text>
                 <text x="1006" y="752" text-anchor="middle">2026</text>
-                <text x="1057" y="752" text-anchor="middle" fill="#1A1A1A" opacity="0.45" font-style="italic">— ?</text>
+                <text class="from-l2" x="1057" y="752" text-anchor="middle" fill="#1A1A1A" opacity="0.45" font-style="italic">— ?</text>
             </g>
 
-            <text x="80" y="772"
+            <text class="from-l4" x="80" y="772"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="4.6" fill="#1A1A1A" opacity="0.55"
                   letter-spacing="0.6">TIME SCALE NON-UNIFORM — DEEP PAST COMPRESSED, MODERN ERA EXPANDED</text>
 
-            <!-- Footer claim -->
+            <!-- Footer claim — always visible -->
             <line x1="60" y1="800" x2="1129" y2="800"
                   stroke="#1A1A1A" stroke-width="0.3" opacity="0.30"/>
             <text x="60" y="820"
@@ -514,7 +578,7 @@
                   font-style="italic" font-size="11" fill="#1A1A1A">
                 A language has presence, with or without an institution willing to recognise it.
             </text>
-            <text x="1129" y="828"
+            <text class="from-l4" x="1129" y="828"
                   font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                   font-size="5.4" text-anchor="end" fill="#1A1A1A" opacity="0.55"
                   letter-spacing="1.2">SEISMIC SHIFTS — A LONG ARC / 2026</text>
@@ -527,9 +591,10 @@
 </div>
 
     <h2>What this shows</h2>
-    <p>The vertical axis is presence. Above the baseline: Deaf life and signed languages held as a recognised, transmitted feature of human community. Below: suppressed. The baseline itself is the deep historical norm — 65,000 years of continuous signed-language presence on this continent and others, long before any institution thought to record it.</p>
+    <p>The vertical axis is presence. Above the baseline: Deaf life and signed languages held as a celebrated, transmitted feature of human community. Below: suppressed. The baseline itself is the deep historical norm — 65,000 years of continuous signed-language presence on this continent and others, long before any institution thought to record it.</p>
     <p>The trace runs at-baseline through the deep past. It rises modestly through the Western institutional period of the 18th and 19th centuries. It plummets at the 1880 Milan Congress. It deepens through the eugenics era of Alexander Graham Bell and his contemporaries — the 1907 Indiana sterilisation law, Australian assimilation policies, the 1933 Nazi sterilisation law and Aktion T4. It begins climbing again in 1960 with William Stokoe's demonstration that ASL is a natural language; it continues through the naming of Auslan, Deaf President Now, the recognition of NZSL, and the ICED's 2010 apology for the Milan resolutions. In 2026 it is rising. It is not yet at the line it left.</p>
     <p>The right ten per cent of the page is intentionally blank. The trace has not been drawn there yet.</p>
+    <p>The slider above the figure strips the page back. At <strong>full</strong>, every annotation is shown. At <strong>minimal</strong>, only the bones remain: the trace, the ripple at 1880, a dot and short label for each moment, and the y-axis terms — celebrated, baseline, suppressed.</p>
 
     <h2>Timeline</h2>
     <ul>
@@ -571,6 +636,21 @@
         <a href="support.html">Support</a>
     </span>
 </footer>
+
+<script>
+    (function () {
+        var slider = document.getElementById('detail-slider');
+        var figure = document.querySelector('.arc-figure');
+        var output = document.getElementById('detail-output');
+        var labels = { '1': 'minimal', '2': 'context', '3': 'annotations', '4': 'full' };
+        function update() {
+            figure.setAttribute('data-detail', slider.value);
+            output.textContent = labels[slider.value];
+        }
+        slider.addEventListener('input', update);
+        update();
+    })();
+</script>
 
 </body>
 </html>
